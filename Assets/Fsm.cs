@@ -7,13 +7,13 @@ public class Fsm
         Exit
     }
 
-    public delegate State State(Fsm fsm, Step step, State state);
+    public delegate void State(Fsm fsm, Step step, State state);
 
     State _currentState;
 
     public void Start(State startState)
     {
-        TransitionToState(startState);
+        TransitionTo(startState);
     }
 
     public void OnUpdate()
@@ -21,7 +21,7 @@ public class Fsm
         _currentState.Invoke(this, Step.Update, null);
     }
 
-    private void TransitionToState(State state)
+    public void TransitionTo(State state)
     {
         _currentState?.Invoke(this, Step.Exit, state);
         var oldState = _currentState;
