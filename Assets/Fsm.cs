@@ -1,5 +1,3 @@
-﻿using UnityEngine;
-
 public class Fsm
 {
     public enum Step
@@ -9,37 +7,25 @@ public class Fsm
         Exit
     }
 
-    public delegate FsmState FsmState(Step step);
+    public delegate State State(Fsm fsm, Step step, State state);
 
-    private FsmState _currentState;
+    State _currentState;
 
-    public void Start(FsmState startState)
+    public void Start(State startState)
     {
         TransitionToState(startState);
     }
 
-    public void Update()
+    public void OnUpdate()
     {
-        FsmState nextState = _currentState(Step.Update);
-        if (nextState != null)
-        {
-            TransitionToState(nextState);
-        }
+        _currentState.Invoke(this, Step.Update, null);
     }
 
-    private void TransitionToState(FsmState state)
+    private void TransitionToState(State state)
     {
-        if (_currentState?.Invoke(Step.Exit) != null)
-        {
-            Debug.LogWarning("FsmStates returned from Exit are ignored");
-        }
-
+        _currentState?.Invoke(this, Step.Exit, state);
+        var oldState = _currentState;
         _currentState = state;
-        FsmState nextState = _currentState?.Invoke(Step.Enter);
-
-        if (nextState != null)
-        {
-            TransitionToState(nextState);
-        }
+        _currentState.Invoke(this, Step.Enter, oldState);
     }
 }
